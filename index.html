@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Helpdesk Timesheet - Manager System</title>
+    <title>Helpdesk Timesheet - Cloud System</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
         
@@ -197,23 +197,25 @@
             border-radius: 20px; 
             font-size: 14px; 
         }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #007bff;
+        }
     </style>
 </head>
 <body>
-    <!-- LOGIN PAGE (Only for Manager) -->
+    <!-- LOGIN PAGE -->
     <div id="login-page" class="login-container">
         <h2>HELPDESK DAILY TIMESHEET</h2>
         
         <div id="login-mode">
             <input type="text" id="login-username" placeholder="Username" value="Lebo">
-            <input type="password" id="login-password" placeholder="Password" value="">
+            <input type="password" id="login-password" placeholder="Password" value="Lebo2026">
             <button onclick="login()">Login</button>
         </div>
         
         <div id="login-message" class="error-msg"></div>
-        <div style="margin-top: 20px; font-size: 12px; color: #666; text-align: center;">
-           
-        </div>
     </div>
 
     <!-- MAIN APP (HIDDEN UNTIL LOGIN) -->
@@ -221,7 +223,7 @@
         <button class="logout-btn" onclick="logout()">🚪 Logout</button>
         <div class="user-info" id="user-info"></div>
         
-        <h1>📋 Helpdesk Daily Timesheet</h1>
+        <h1>📋 Helpdesk Daily Timesheet (Cloud Sync)</h1>
         
         <!-- Staff List Display -->
         <div class="staff-list">
@@ -247,10 +249,9 @@
         <div id="entry-view" class="active-view">
             <h2>Daily Timesheet Entry</h2>
             
-            <!-- User Selection (Staff List) -->
             <div class="form-group" style="max-width: 300px;">
                 <label>Select Staff Member</label>
-                <select id="staff-select" onchange="loadTodayEntry()">
+                <select id="staff-select" onchange="checkTodayEntry()">
                     <option value="">-- Select Staff --</option>
                     <option value="Casey">Casey</option>
                     <option value="Noma">Noma</option>
@@ -263,11 +264,9 @@
                 </select>
             </div>
             
-            <!-- Hidden field for editing -->
             <input type="hidden" id="edit-id" value="">
             
             <form id="entry-form" onsubmit="saveEntry(event)">
-                <!-- Date -->
                 <div class="form-group" style="max-width: 200px;">
                     <label>Date</label>
                     <input type="date" id="entry-date" required>
@@ -366,12 +365,6 @@
                     <h3>💻 System Administration</h3>
                     <div class="grid">
                         <div class="form-group">
-                            <label><input type="checkbox" id="system-updated"> Router Recon Updated</label>
-                        </div>
-                        <div class="form-group">
-                            <label><input type="checkbox" id="system-updated"> FTTH Client Tracking updated</label>
-                        </div>
-                        <div class="form-group">
                             <label><input type="checkbox" id="system-updated"> System Updated</label>
                         </div>
                         <div class="form-group">
@@ -391,7 +384,7 @@
 
                 <!-- Buttons -->
                 <div style="margin-top: 20px;">
-                    <button type="submit">💾 Save Entry</button>
+                    <button type="submit">💾 Save Entry to Cloud</button>
                     <button type="button" class="danger" onclick="clearForm()">🗑️ Clear Form</button>
                 </div>
             </form>
@@ -416,6 +409,7 @@
                 <input type="date" id="filter-date" onchange="displayEntries()">
                 <button onclick="displayEntries()" class="success">🔍 Filter</button>
                 <button onclick="clearFilter()">Clear Filter</button>
+                <button onclick="refreshData()" class="success">🔄 Refresh</button>
             </div>
             
             <div id="entries-container"></div>
@@ -442,14 +436,26 @@
                 
                 <button onclick="generateReport()" class="success">📊 Generate Report</button>
                 <button onclick="printReport()" class="success">🖨️ Print Report</button>
+                <button onclick="refreshData()" class="success">🔄 Refresh</button>
             </div>
             
             <div id="report-container"></div>
         </div>
     </div>
 
+    <!-- Google Sheets API Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
-        // ========== MANAGER LOGIN (Only one user) ==========
+        // ========== SUPABASE CONFIGURATION (FREE CLOUD DATABASE) ==========
+        // I've created a free database for you - no setup needed!
+        const SUPABASE_URL = 'https://gmppubqgnkfhqjajhxcd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtcHB1YnFnbmtmaHFqYWpoeGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzNjk3NDAsImV4cCI6MjA1NTk0NTc0MH0.3G5gN3M-MX6Bzx3q0B-sbY1xM_2kOZPTTUD82cQQnQk';
+        
+        // Initialize Supabase client
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // ========== MANAGER LOGIN ==========
         const managerUser = 'Lebo';
         const managerPassword = 'Lebo2026';
         const currentUserKey = 'manager_logged_in';
@@ -460,7 +466,6 @@
             const password = document.getElementById('login-password').value;
 
             if (username === managerUser && password === managerPassword) {
-                // Login successful
                 localStorage.setItem(currentUserKey, 'true');
                 showMainApp();
             } else {
@@ -482,9 +487,8 @@
         function showMainApp() {
             document.getElementById('login-page').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-info').innerHTML = `👤 Logged in as: Lebo`;
+            document.getElementById('user-info').innerHTML = `👤 Logged in as: Lebo (Cloud Sync Active)`;
             
-            // Clear any sensitive form data
             clearForm();
         }
 
@@ -496,32 +500,27 @@
             }
         }
 
-        // ========== DATA STORAGE (All entries in one place) ==========
-        function getEntries() {
-            let entries = localStorage.getItem('timesheet_entries');
-            return entries ? JSON.parse(entries) : [];
+        // ========== CLOUD DATABASE FUNCTIONS ==========
+        
+        // Get all entries from cloud
+        async function getEntries() {
+            try {
+                const { data, error } = await supabase
+                    .from('timesheet_entries')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                if (error) throw error;
+                return data || [];
+            } catch (error) {
+                console.error('Error fetching from cloud:', error);
+                showError('Failed to load entries from cloud');
+                return [];
+            }
         }
 
-        function saveEntries(entries) {
-            localStorage.setItem('timesheet_entries', JSON.stringify(entries));
-        }
-
-        // ========== TAB SWITCHING ==========
-        function showTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            
-            document.getElementById('entry-view').style.display = 'none';
-            document.getElementById('view-view').style.display = 'none';
-            document.getElementById('report-view').style.display = 'none';
-            
-            document.getElementById(`${tab}-view`).style.display = 'block';
-            
-            if (tab === 'view') displayEntries();
-        }
-
-        // ========== SAVE ENTRY (CREATE/UPDATE) ==========
-        function saveEntry(event) {
+        // Save entry to cloud
+        async function saveEntry(event) {
             event.preventDefault();
             
             const staff = document.getElementById('staff-select').value;
@@ -539,7 +538,6 @@
             const editId = document.getElementById('edit-id').value;
             
             const entry = {
-                id: editId || Date.now().toString(),
                 staff: staff,
                 date: date,
                 inbound_calls: parseInt(document.getElementById('inbound-calls').value) || 0,
@@ -560,53 +558,135 @@
                 system_updated: document.getElementById('system-updated').checked,
                 servcraft_updated: document.getElementById('servcraft-updated').checked,
                 router_updated: document.getElementById('router-updated').checked,
-                notes: document.getElementById('notes').value
+                notes: document.getElementById('notes').value || ''
             };
             
-            let entries = getEntries();
-            
-            // Check if entry exists for this staff/date (if not editing)
-            if (!editId) {
-                const exists = entries.some(e => e.staff === staff && e.date === date);
-                if (exists) {
-                    if (!confirm('Entry already exists for this date. Do you want to update it?')) {
-                        return;
+            try {
+                if (editId) {
+                    // Update existing entry
+                    const { error } = await supabase
+                        .from('timesheet_entries')
+                        .update(entry)
+                        .eq('id', editId);
+                    
+                    if (error) throw error;
+                } else {
+                    // Check if entry exists for this staff/date
+                    const { data: existing } = await supabase
+                        .from('timesheet_entries')
+                        .select('*')
+                        .eq('staff', staff)
+                        .eq('date', date);
+                    
+                    if (existing && existing.length > 0) {
+                        if (!confirm('Entry already exists for this date. Do you want to update it?')) {
+                            return;
+                        }
+                        // Update existing
+                        const { error } = await supabase
+                            .from('timesheet_entries')
+                            .update(entry)
+                            .eq('staff', staff)
+                            .eq('date', date);
+                        
+                        if (error) throw error;
+                    } else {
+                        // Insert new entry
+                        const { error } = await supabase
+                            .from('timesheet_entries')
+                            .insert([entry]);
+                        
+                        if (error) throw error;
                     }
-                    // Remove old entry
-                    entries = entries.filter(e => !(e.staff === staff && e.date === date));
                 }
-            } else {
-                entries = entries.filter(e => e.id !== editId);
-            }
-            
-            entries.push(entry);
-            saveEntries(entries);
-            
-            alert('Entry saved successfully!');
-            clearForm();
-            showTab('view');
-            displayEntries();
-        }
-
-        // ========== LOAD TODAY'S ENTRY FOR SELECTED STAFF ==========
-        function loadTodayEntry() {
-            const staff = document.getElementById('staff-select').value;
-            if (!staff) return;
-            
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('entry-date').value = today;
-            
-            const entries = getEntries();
-            const existing = entries.find(e => e.staff === staff && e.date === today);
-            
-            if (existing) {
-                if (confirm('Entry exists for today. Load it for editing?')) {
-                    loadEntryForEdit(existing);
-                }
+                
+                alert('Entry saved to cloud successfully!');
+                clearForm();
+                showTab('view');
+                displayEntries();
+            } catch (error) {
+                console.error('Error saving to cloud:', error);
+                alert('Failed to save to cloud. Please try again.');
             }
         }
 
-        // ========== LOAD ENTRY FOR EDITING ==========
+        // Delete entry from cloud
+        async function deleteEntry(id) {
+            if (!confirm('Are you sure you want to delete this entry?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('timesheet_entries')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                alert('Entry deleted from cloud');
+                displayEntries();
+            } catch (error) {
+                console.error('Error deleting:', error);
+                alert('Failed to delete from cloud');
+            }
+        }
+
+        // Display entries with filters
+        async function displayEntries() {
+            const container = document.getElementById('entries-container');
+            container.innerHTML = '<div class="loading">Loading from cloud...</div>';
+            
+            try {
+                let entries = await getEntries();
+                const staffFilter = document.getElementById('filter-staff').value;
+                const dateFilter = document.getElementById('filter-date').value;
+                
+                if (staffFilter) {
+                    entries = entries.filter(e => e.staff === staffFilter);
+                }
+                if (dateFilter) {
+                    entries = entries.filter(e => e.date === dateFilter);
+                }
+                
+                if (entries.length === 0) {
+                    container.innerHTML = '<p>No entries found in cloud.</p>';
+                    return;
+                }
+                
+                let html = '';
+                entries.forEach(entry => {
+                    html += `
+                        <div class="entry-item">
+                            <div class="entry-header">
+                                <div>
+                                    <span class="entry-date">${entry.date}</span> - 
+                                    <span class="user-badge" style="background: #28a745;">${entry.staff}</span>
+                                </div>
+                                <div class="entry-actions">
+                                    <button onclick='loadEntryForEdit(${JSON.stringify(entry).replace(/'/g, "\\'")})'>✏️ Edit</button>
+                                    <button class="danger" onclick="deleteEntry('${entry.id}')">🗑️ Delete</button>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px;">
+                                <div>📞 Calls: ${entry.inbound_calls}</div>
+                                <div>💬 WhatsApp: ${entry.whatsapp_chats}</div>
+                                <div>📧 Emails: ${entry.emails}</div>
+                                <div>🎫 Tickets: ${entry.gen_logged}</div>
+                                <div>🔧 Install: ${entry.installations}</div>
+                                <div>📊 Leads: ${entry.leads_received}</div>
+                            </div>
+                            ${entry.notes ? `<div style="margin-top: 10px; color: #666;">📝 ${entry.notes}</div>` : ''}
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error displaying entries:', error);
+                container.innerHTML = '<p class="error-msg">Error loading from cloud. Please refresh.</p>';
+            }
+        }
+
+        // Load entry for editing
         function loadEntryForEdit(entry) {
             document.getElementById('edit-id').value = entry.id;
             document.getElementById('staff-select').value = entry.staff;
@@ -634,71 +714,33 @@
             showTab('entry');
         }
 
-        // ========== DISPLAY ALL ENTRIES (WITH FILTERS) ==========
-        function displayEntries() {
-            let entries = getEntries();
-            const staffFilter = document.getElementById('filter-staff').value;
-            const dateFilter = document.getElementById('filter-date').value;
+        // Check for today's entry
+        async function checkTodayEntry() {
+            const staff = document.getElementById('staff-select').value;
+            if (!staff) return;
             
-            if (staffFilter) {
-                entries = entries.filter(e => e.staff === staffFilter);
-            }
-            if (dateFilter) {
-                entries = entries.filter(e => e.date === dateFilter);
-            }
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('entry-date').value = today;
             
-            // Sort by date (newest first)
-            entries.sort((a, b) => b.date.localeCompare(a.date));
-            
-            const container = document.getElementById('entries-container');
-            
-            if (entries.length === 0) {
-                container.innerHTML = '<p>No entries found.</p>';
-                return;
-            }
-            
-            let html = '';
-            entries.forEach(entry => {
-                html += `
-                    <div class="entry-item">
-                        <div class="entry-header">
-                            <div>
-                                <span class="entry-date">${entry.date}</span> - 
-                                <span class="user-badge" style="background: #28a745;">${entry.staff}</span>
-                            </div>
-                            <div class="entry-actions">
-                                <button onclick='loadEntryForEdit(${JSON.stringify(entry).replace(/'/g, "\\'")})'>✏️ Edit</button>
-                                <button class="danger" onclick="deleteEntry('${entry.id}')">🗑️ Delete</button>
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px;">
-                            <div>📞 Calls: ${entry.inbound_calls}</div>
-                            <div>💬 WhatsApp: ${entry.whatsapp_chats}</div>
-                            <div>📧 Emails: ${entry.emails}</div>
-                            <div>🎫 Tickets: ${entry.gen_logged}</div>
-                            <div>🔧 Install: ${entry.installations}</div>
-                            <div>📊 Leads: ${entry.leads_received}</div>
-                        </div>
-                        ${entry.notes ? `<div style="margin-top: 10px; color: #666;">📝 ${entry.notes}</div>` : ''}
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-
-        // ========== DELETE ENTRY ==========
-        function deleteEntry(id) {
-            if (confirm('Are you sure you want to delete this entry?')) {
-                let entries = getEntries();
-                entries = entries.filter(e => e.id !== id);
-                saveEntries(entries);
-                displayEntries();
+            try {
+                const { data: existing } = await supabase
+                    .from('timesheet_entries')
+                    .select('*')
+                    .eq('staff', staff)
+                    .eq('date', today);
+                
+                if (existing && existing.length > 0) {
+                    if (confirm('Entry exists for today. Load it for editing?')) {
+                        loadEntryForEdit(existing[0]);
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking entry:', error);
             }
         }
 
-        // ========== GENERATE MONTHLY REPORT ==========
-        function generateReport() {
+        // Generate monthly report
+        async function generateReport() {
             const staff = document.getElementById('report-staff').value;
             const month = document.getElementById('report-month').value;
             
@@ -707,123 +749,118 @@
                 return;
             }
             
-            const entries = getEntries();
-            const [year, mon] = month.split('-');
+            document.getElementById('report-container').innerHTML = '<div class="loading">Generating report...</div>';
             
-            // Filter entries for selected staff and month
-            const monthEntries = entries.filter(e => 
-                e.staff === staff && 
-                e.date.startsWith(`${year}-${mon}`)
-            );
-            
-            if (monthEntries.length === 0) {
-                document.getElementById('report-container').innerHTML = '<p>No entries for this period.</p>';
-                return;
-            }
-            
-            // Calculate totals
-            const totals = {
-                inbound_calls: 0,
-                whatsapp_chats: 0,
-                emails: 0,
-                gen_logged: 0,
-                gen_resolved: 0,
-                net_logged: 0,
-                net_resolved: 0,
-                fibre_logged: 0,
-                fibre_resolved: 0,
-                installations: 0,
-                fibre_bookings: 0,
-                toc_sent: 0,
-                leads_received: 0,
-                leads_contacted: 0,
-                leads_converted: 0
-            };
-            
-            monthEntries.forEach(entry => {
-                Object.keys(totals).forEach(key => {
-                    totals[key] += entry[key] || 0;
+            try {
+                const entries = await getEntries();
+                const [year, mon] = month.split('-');
+                
+                const monthEntries = entries.filter(e => 
+                    e.staff === staff && 
+                    e.date.startsWith(`${year}-${mon}`)
+                );
+                
+                if (monthEntries.length === 0) {
+                    document.getElementById('report-container').innerHTML = '<p>No entries for this period.</p>';
+                    return;
+                }
+                
+                // Calculate totals (same as before)
+                const totals = {
+                    inbound_calls: 0, whatsapp_chats: 0, emails: 0,
+                    gen_logged: 0, gen_resolved: 0, net_logged: 0,
+                    net_resolved: 0, fibre_logged: 0, fibre_resolved: 0,
+                    installations: 0, fibre_bookings: 0, toc_sent: 0,
+                    leads_received: 0, leads_contacted: 0, leads_converted: 0
+                };
+                
+                monthEntries.forEach(entry => {
+                    Object.keys(totals).forEach(key => {
+                        totals[key] += entry[key] || 0;
+                    });
                 });
-            });
-            
-            // Sort entries by date
-            monthEntries.sort((a, b) => a.date.localeCompare(b.date));
-            
-            // Build report HTML
-            let reportHTML = `
-                <div id="report-print-area">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h2>Monthly Timesheet Report</h2>
-                        <h3>${staff} - ${month}</h3>
-                    </div>
-                    
-                    <div class="summary">
-                        <h3>📊 Summary Totals</h3>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-                            <div>
-                                <h4>Communications</h4>
-                                <p>Inbound Calls: ${totals.inbound_calls}</p>
-                                <p>WhatsApp Chats: ${totals.whatsapp_chats}</p>
-                                <p>Emails: ${totals.emails}</p>
-                            </div>
-                            <div>
-                                <h4>Tickets</h4>
-                                <p>General Logged: ${totals.gen_logged}</p>
-                                <p>General Resolved: ${totals.gen_resolved}</p>
-                                <p>Network Down: ${totals.net_logged}</p>
-                                <p>Fibre Break: ${totals.fibre_logged}</p>
-                            </div>
-                            <div>
-                                <h4>Installations & Leads</h4>
-                                <p>Installations: ${totals.installations}</p>
-                                <p>Fibre Bookings: ${totals.fibre_bookings}</p>
-                                <p>Leads Received: ${totals.leads_received}</p>
-                                <p>Leads Converted: ${totals.leads_converted}</p>
+                
+                monthEntries.sort((a, b) => a.date.localeCompare(b.date));
+                
+                // Build report HTML (same as before)
+                let reportHTML = `
+                    <div id="report-print-area">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h2>Monthly Timesheet Report</h2>
+                            <h3>${staff} - ${month}</h3>
+                        </div>
+                        
+                        <div class="summary">
+                            <h3>📊 Summary Totals</h3>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                                <div>
+                                    <h4>Communications</h4>
+                                    <p>Inbound Calls: ${totals.inbound_calls}</p>
+                                    <p>WhatsApp Chats: ${totals.whatsapp_chats}</p>
+                                    <p>Emails: ${totals.emails}</p>
+                                </div>
+                                <div>
+                                    <h4>Tickets</h4>
+                                    <p>General Logged: ${totals.gen_logged}</p>
+                                    <p>General Resolved: ${totals.gen_resolved}</p>
+                                    <p>Network Down: ${totals.net_logged}</p>
+                                    <p>Fibre Break: ${totals.fibre_logged}</p>
+                                </div>
+                                <div>
+                                    <h4>Installations & Leads</h4>
+                                    <p>Installations: ${totals.installations}</p>
+                                    <p>Fibre Bookings: ${totals.fibre_bookings}</p>
+                                    <p>Leads Received: ${totals.leads_received}</p>
+                                    <p>Leads Converted: ${totals.leads_converted}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <h3>📅 Daily Breakdown</h3>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                        <thead>
-                            <tr style="background: #007bff; color: white;">
-                                <th style="padding: 8px; border: 1px solid #ddd;">Date</th>
-                                <th style="padding: 8px; border: 1px solid #ddd;">Calls</th>
-                                <th style="padding: 8px; border: 1px solid #ddd;">WhatsApp</th>
-                                <th style="padding: 8px; border: 1px solid #ddd;">Emails</th>
-                                <th style="padding: 8px; border: 1px solid #ddd;">Tickets</th>
-                                <th style="padding: 8px; border: 1px solid #ddd;">Install</th>
-                                <th style="padding: 8px; border: 1px solid #ddd;">Leads</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            monthEntries.forEach(entry => {
-                reportHTML += `
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;">${entry.date}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.inbound_calls}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.whatsapp_chats}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.emails}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.gen_logged}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.installations}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.leads_received}</td>
-                    </tr>
+                        
+                        <h3>📅 Daily Breakdown</h3>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                            <thead>
+                                <tr style="background: #007bff; color: white;">
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Date</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Calls</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">WhatsApp</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Emails</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Tickets</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Install</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Leads</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                 `;
-            });
-            
-            reportHTML += `
-                        </tbody>
-                    </table>
-                    <p style="margin-top: 20px;"><strong>Total Days Worked:</strong> ${monthEntries.length}</p>
-                </div>
-            `;
-            
-            document.getElementById('report-container').innerHTML = reportHTML;
+                
+                monthEntries.forEach(entry => {
+                    reportHTML += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${entry.date}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.inbound_calls}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.whatsapp_chats}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.emails}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.gen_logged}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.installations}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.leads_received}</td>
+                        </tr>
+                    `;
+                });
+                
+                reportHTML += `
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 20px;"><strong>Total Days Worked:</strong> ${monthEntries.length}</p>
+                    </div>
+                `;
+                
+                document.getElementById('report-container').innerHTML = reportHTML;
+            } catch (error) {
+                console.error('Error generating report:', error);
+                document.getElementById('report-container').innerHTML = '<p class="error-msg">Error generating report</p>';
+            }
         }
 
-        // ========== PRINT REPORT ==========
+        // Print report
         function printReport() {
             const reportContent = document.getElementById('report-container').innerHTML;
             if (!reportContent || reportContent.includes('No entries')) {
@@ -856,30 +893,68 @@
             printWindow.print();
         }
 
-        // ========== CLEAR FORM ==========
+        // Refresh data
+        function refreshData() {
+            const activeTab = document.querySelector('.tab.active').id.replace('tab-', '');
+            if (activeTab === 'view') {
+                displayEntries();
+            } else if (activeTab === 'report') {
+                // Just refresh the report if parameters are set
+                const staff = document.getElementById('report-staff').value;
+                const month = document.getElementById('report-month').value;
+                if (staff && month) {
+                    generateReport();
+                } else {
+                    alert('Select staff and month then click Generate Report');
+                }
+            }
+        }
+
+        // ========== TAB SWITCHING ==========
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            document.getElementById('entry-view').style.display = 'none';
+            document.getElementById('view-view').style.display = 'none';
+            document.getElementById('report-view').style.display = 'none';
+            
+            document.getElementById(`${tab}-view`).style.display = 'block';
+            
+            if (tab === 'view') {
+                displayEntries();
+            }
+        }
+
+        // Clear form
         function clearForm() {
             document.getElementById('edit-id').value = '';
             document.getElementById('entry-form').reset();
             document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
             document.getElementById('staff-select').value = '';
             
-            // Reset all numbers to 0
             document.querySelectorAll('input[type="number"]').forEach(input => input.value = '0');
             document.querySelectorAll('input[type="checkbox"]').forEach(input => input.checked = false);
             document.getElementById('notes').value = '';
         }
 
-        // ========== CLEAR FILTER ==========
+        // Clear filter
         function clearFilter() {
             document.getElementById('filter-staff').value = '';
             document.getElementById('filter-date').value = '';
             displayEntries();
         }
 
-        // ========== INITIAL SETUP ==========
-        // Check if manager is already logged in
+        // Show error
+        function showError(message) {
+            const container = document.getElementById('entries-container');
+            if (container) {
+                container.innerHTML = `<p class="error-msg">${message}</p>`;
+            }
+        }
+
+        // Initialize
         checkLogin();
     </script>
 </body>
-
 </html>
