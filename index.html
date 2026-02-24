@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Helpdesk Timesheet - Cloud System</title>
+    <title>Helpdesk Timesheet</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
         
-        /* Body with background image */
         body { 
             padding: 0; 
             margin: 0;
@@ -19,7 +18,6 @@
             justify-content: center;
         }
         
-        /* Semi-transparent overlay for better readability */
         body::before {
             content: '';
             position: fixed;
@@ -38,7 +36,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
         }
         
-        /* Login Styles */
         .login-container {
             max-width: 400px;
             margin: 0 auto;
@@ -57,7 +54,6 @@
             margin-bottom: 30px; 
             color: #333;
             font-size: 28px;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
         }
         
         .login-container input {
@@ -67,13 +63,11 @@
             border: 2px solid #e1e1e1;
             border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s;
         }
         
         .login-container input:focus {
             border-color: #007bff;
             outline: none;
-            box-shadow: 0 0 10px rgba(0,123,255,0.2);
         }
         
         .login-container button {
@@ -87,13 +81,10 @@
             font-size: 18px;
             font-weight: bold;
             margin: 10px 0;
-            transition: background 0.3s;
         }
         
         .login-container button:hover { 
             background: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
         .error-msg { 
@@ -101,19 +92,6 @@
             text-align: center; 
             margin: 10px 0; 
             font-weight: bold;
-            background: rgba(220,53,69,0.1);
-            padding: 10px;
-            border-radius: 5px;
-        }
-        
-        .success-msg { 
-            color: #28a745; 
-            text-align: center; 
-            margin: 10px 0; 
-            font-weight: bold;
-            background: rgba(40,167,69,0.1);
-            padding: 10px;
-            border-radius: 5px;
         }
         
         .logout-btn {
@@ -139,7 +117,6 @@
             background: white;
             padding: 8px 15px;
             border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .main-content {
@@ -152,7 +129,6 @@
             z-index: 1;
         }
         
-        /* Original styles */
         h2 { color: #333; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
         .form-section { background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #007bff; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
@@ -163,24 +139,13 @@
         button:hover { background: #0056b3; }
         button.danger { background: #dc3545; }
         button.success { background: #28a745; }
-        .entries-list { margin-top: 30px; }
         .entry-item { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #ddd; }
         .entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .entry-date { font-weight: bold; color: #007bff; }
         .entry-actions button { padding: 5px 10px; font-size: 12px; margin: 0 5px; }
         .summary { background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        .report-view { display: none; }
-        .active-view { display: block; }
-        .print-only { display: none; }
-        @media print {
-            .no-print { display: none; }
-            .print-only { display: block; }
-            body { background: white; padding: 0; }
-            .container { box-shadow: none; }
-        }
         .tab { display: inline-block; padding: 10px 20px; background: #ddd; cursor: pointer; margin-right: 5px; border-radius: 5px 5px 0 0; }
         .tab.active { background: #007bff; color: white; }
-        .user-badge { background: #007bff; color: white; padding: 5px 10px; border-radius: 20px; display: inline-block; margin-bottom: 10px; }
         .staff-list { 
             display: flex; 
             flex-wrap: wrap; 
@@ -197,11 +162,6 @@
             border-radius: 20px; 
             font-size: 14px; 
         }
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #007bff;
-        }
     </style>
 </head>
 <body>
@@ -211,21 +171,20 @@
         
         <div id="login-mode">
             <input type="text" id="login-username" placeholder="Username" value="Lebo">
-            <input type="password" id="login-password" placeholder="Password" value="Lebo2026">
+            <input type="password" id="login-password" placeholder="Password" value="">
             <button onclick="login()">Login</button>
         </div>
         
         <div id="login-message" class="error-msg"></div>
     </div>
 
-    <!-- MAIN APP (HIDDEN UNTIL LOGIN) -->
+    <!-- MAIN APP -->
     <div id="main-app" class="container main-content">
         <button class="logout-btn" onclick="logout()">🚪 Logout</button>
         <div class="user-info" id="user-info"></div>
         
-        <h1>📋 Helpdesk Daily Timesheet (Cloud Sync)</h1>
+        <h1>📋 Helpdesk Daily Timesheet</h1>
         
-        <!-- Staff List Display -->
         <div class="staff-list">
             <strong>Staff Members:</strong>
             <span class="staff-tag">Casey</span>
@@ -238,14 +197,14 @@
             <span class="staff-tag">Lebo</span>
         </div>
         
-        <!-- Simple Tabs -->
+        <!-- Tabs -->
         <div>
             <span class="tab active" onclick="showTab('entry')" id="tab-entry">📝 Daily Entry</span>
             <span class="tab" onclick="showTab('view')" id="tab-view">👀 View All</span>
             <span class="tab" onclick="showTab('report')" id="tab-report">📊 Monthly Report</span>
         </div>
 
-        <!-- ========== TAB 1: DAILY ENTRY ========== -->
+        <!-- TAB 1: DAILY ENTRY -->
         <div id="entry-view" class="active-view">
             <h2>Daily Timesheet Entry</h2>
             
@@ -272,125 +231,68 @@
                     <input type="date" id="entry-date" required>
                 </div>
 
-                <!-- Section 1: Communication Handling -->
+                <!-- Form sections (same as before) -->
                 <div class="form-section">
                     <h3>📞 Communication Handling</h3>
                     <div class="grid">
-                        <div class="form-group">
-                            <label>Inbound Calls</label>
-                            <input type="number" id="inbound-calls" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>WhatsApp Chats</label>
-                            <input type="number" id="whatsapp-chats" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Emails</label>
-                            <input type="number" id="emails" value="0" min="0">
-                        </div>
+                        <div class="form-group"><label>Inbound Calls</label><input type="number" id="inbound-calls" value="0" min="0"></div>
+                        <div class="form-group"><label>WhatsApp Chats</label><input type="number" id="whatsapp-chats" value="0" min="0"></div>
+                        <div class="form-group"><label>Emails</label><input type="number" id="emails" value="0" min="0"></div>
                     </div>
                 </div>
 
-                <!-- Section 2: Ticket Management -->
                 <div class="form-section">
                     <h3>🎫 Ticket Management</h3>
                     <div class="grid">
-                        <div class="form-group">
-                            <label>General Tickets Logged</label>
-                            <input type="number" id="gen-logged" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>General Tickets Resolved</label>
-                            <input type="number" id="gen-resolved" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Network Down Logged</label>
-                            <input type="number" id="net-logged" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Network Down Resolved</label>
-                            <input type="number" id="net-resolved" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Fibre Break Logged</label>
-                            <input type="number" id="fibre-logged" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Fibre Break Resolved</label>
-                            <input type="number" id="fibre-resolved" value="0" min="0">
-                        </div>
+                        <div class="form-group"><label>General Tickets Logged</label><input type="number" id="gen-logged" value="0" min="0"></div>
+                        <div class="form-group"><label>General Tickets Resolved</label><input type="number" id="gen-resolved" value="0" min="0"></div>
+                        <div class="form-group"><label>Network Down Logged</label><input type="number" id="net-logged" value="0" min="0"></div>
+                        <div class="form-group"><label>Network Down Resolved</label><input type="number" id="net-resolved" value="0" min="0"></div>
+                        <div class="form-group"><label>Fibre Break Logged</label><input type="number" id="fibre-logged" value="0" min="0"></div>
+                        <div class="form-group"><label>Fibre Break Resolved</label><input type="number" id="fibre-resolved" value="0" min="0"></div>
                     </div>
                 </div>
 
-                <!-- Section 3: Installations -->
                 <div class="form-section">
                     <h3>🔧 Installations & Scheduling</h3>
                     <div class="grid">
-                        <div class="form-group">
-                            <label>New Installations Scheduled</label>
-                            <input type="number" id="installations" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Fibre Break Jobs Booked</label>
-                            <input type="number" id="fibre-bookings" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>TOC Sent</label>
-                            <input type="number" id="toc-sent" value="0" min="0">
-                        </div>
+                        <div class="form-group"><label>New Installations Scheduled</label><input type="number" id="installations" value="0" min="0"></div>
+                        <div class="form-group"><label>Fibre Break Jobs Booked</label><input type="number" id="fibre-bookings" value="0" min="0"></div>
+                        <div class="form-group"><label>TOC Sent</label><input type="number" id="toc-sent" value="0" min="0"></div>
                     </div>
                 </div>
 
-                <!-- Section 4: Campaigns -->
                 <div class="form-section">
                     <h3>📢 Campaign & Lead Management</h3>
                     <div class="grid">
-                        <div class="form-group">
-                            <label>Leads Received</label>
-                            <input type="number" id="leads-received" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Leads Contacted</label>
-                            <input type="number" id="leads-contacted" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Leads Converted</label>
-                            <input type="number" id="leads-converted" value="0" min="0">
-                        </div>
+                        <div class="form-group"><label>Leads Received</label><input type="number" id="leads-received" value="0" min="0"></div>
+                        <div class="form-group"><label>Leads Contacted</label><input type="number" id="leads-contacted" value="0" min="0"></div>
+                        <div class="form-group"><label>Leads Converted</label><input type="number" id="leads-converted" value="0" min="0"></div>
                     </div>
                 </div>
 
-                <!-- Section 5: System Admin -->
                 <div class="form-section">
                     <h3>💻 System Administration</h3>
                     <div class="grid">
-                        <div class="form-group">
-                            <label><input type="checkbox" id="system-updated"> System Updated</label>
-                        </div>
-                        <div class="form-group">
-                            <label><input type="checkbox" id="servcraft-updated"> Servcraft Updated</label>
-                        </div>
-                        <div class="form-group">
-                            <label><input type="checkbox" id="router-updated"> Router Recon Updated</label>
-                        </div>
+                        <div class="form-group"><label><input type="checkbox" id="system-updated"> System Updated</label></div>
+                        <div class="form-group"><label><input type="checkbox" id="servcraft-updated"> Servcraft Updated</label></div>
+                        <div class="form-group"><label><input type="checkbox" id="router-updated"> Router Recon Updated</label></div>
                     </div>
                 </div>
 
-                <!-- Notes -->
                 <div class="form-section">
                     <h3>📝 Notes</h3>
                     <textarea id="notes" rows="3" style="width: 100%;"></textarea>
                 </div>
 
-                <!-- Buttons -->
                 <div style="margin-top: 20px;">
-                    <button type="submit">💾 Save Entry to Cloud</button>
+                    <button type="submit">💾 Save Entry</button>
                     <button type="button" class="danger" onclick="clearForm()">🗑️ Clear Form</button>
                 </div>
             </form>
         </div>
 
-        <!-- ========== TAB 2: VIEW ALL ENTRIES ========== -->
+        <!-- TAB 2: VIEW ALL ENTRIES -->
         <div id="view-view" style="display: none;">
             <h2>All Timesheet Entries</h2>
             
@@ -409,13 +311,12 @@
                 <input type="date" id="filter-date" onchange="displayEntries()">
                 <button onclick="displayEntries()" class="success">🔍 Filter</button>
                 <button onclick="clearFilter()">Clear Filter</button>
-                <button onclick="refreshData()" class="success">🔄 Refresh</button>
             </div>
             
             <div id="entries-container"></div>
         </div>
 
-        <!-- ========== TAB 3: MONTHLY REPORT ========== -->
+        <!-- TAB 3: MONTHLY REPORT -->
         <div id="report-view" style="display: none;">
             <h2>Monthly Report</h2>
             
@@ -436,95 +337,90 @@
                 
                 <button onclick="generateReport()" class="success">📊 Generate Report</button>
                 <button onclick="printReport()" class="success">🖨️ Print Report</button>
-                <button onclick="refreshData()" class="success">🔄 Refresh</button>
             </div>
             
             <div id="report-container"></div>
         </div>
     </div>
 
-    <!-- Google Sheets API Script -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script>
-        // ========== SUPABASE CONFIGURATION (FREE CLOUD DATABASE) ==========
-        // I've created a free database for you - no setup needed!
-        const SUPABASE_URL = 'https://gmppubqgnkfhqjajhxcd.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtcHB1YnFnbmtmaHFqYWpoeGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzNjk3NDAsImV4cCI6MjA1NTk0NTc0MH0.3G5gN3M-MX6Bzx3q0B-sbY1xM_2kOZPTTUD82cQQnQk';
-        
-        // Initialize Supabase client
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        // ========== MANAGER LOGIN ==========
+        // ========== SIMPLE LOGIN (WORKING VERSION) ==========
         const managerUser = 'Lebo';
         const managerPassword = 'Lebo2026';
         const currentUserKey = 'manager_logged_in';
 
-   // Login
-function login() {
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value;
-
-    // Debug - remove after testing
-    console.log('Attempting login with:', username, password);
-    console.log('Expected:', 'Lebo', 'Lebo2026');
-
-    if (username === 'Lebo' && password === 'Lebo2026') {
-        localStorage.setItem('manager_logged_in', 'true');
-        showMainApp();
-    } else {
-        document.getElementById('login-message').innerHTML = 'Invalid username or password';
-    }
-}
-
-        // Logout
-        function logout() {
-            localStorage.removeItem(currentUserKey);
-            document.getElementById('main-app').style.display = 'none';
-            document.getElementById('login-page').style.display = 'block';
-            document.getElementById('login-username').value = 'Lebo';
-            document.getElementById('login-password').value = 'Lebo2026';
-            document.getElementById('login-message').innerHTML = '';
-        }
-
-        // Show main app
-        function showMainApp() {
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-info').innerHTML = `👤 Logged in as: Lebo (Cloud Sync Active)`;
+        // Login function - SIMPLE AND CLEAN
+        function login() {
+            console.log('Login button clicked');
             
-            clearForm();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            console.log('Username:', username);
+            console.log('Password:', password);
+            
+            if (username === 'Lebo' && password === 'Lebo2026') {
+                console.log('Login successful');
+                localStorage.setItem(currentUserKey, 'true');
+                
+                // Hide login, show main app
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                document.getElementById('user-info').innerHTML = '👤 Logged in as: Lebo';
+                
+                clearForm();
+            } else {
+                console.log('Login failed');
+                document.getElementById('login-message').innerHTML = 'Invalid username or password';
+            }
         }
+
+       // Logout
+function logout() {
+    localStorage.removeItem(currentUserKey);
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('login-page').style.display = 'block';
+    document.getElementById('login-username').value = 'Lebo';  // Username stays (convenience)
+    document.getElementById('login-password').value = '';       // Password clears
+    document.getElementById('login-message').innerHTML = '';
+}
 
         // Check if already logged in
         function checkLogin() {
             const isLoggedIn = localStorage.getItem(currentUserKey);
             if (isLoggedIn === 'true') {
-                showMainApp();
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                document.getElementById('user-info').innerHTML = '👤 Logged in as: Lebo';
             }
         }
 
-        // ========== CLOUD DATABASE FUNCTIONS ==========
-        
-        // Get all entries from cloud
-        async function getEntries() {
-            try {
-                const { data, error } = await supabase
-                    .from('timesheet_entries')
-                    .select('*')
-                    .order('date', { ascending: false });
-                
-                if (error) throw error;
-                return data || [];
-            } catch (error) {
-                console.error('Error fetching from cloud:', error);
-                showError('Failed to load entries from cloud');
-                return [];
-            }
+        // ========== DATA STORAGE (localStorage - works on one PC) ==========
+        function getEntries() {
+            let entries = localStorage.getItem('timesheet_entries');
+            return entries ? JSON.parse(entries) : [];
         }
 
-        // Save entry to cloud
-        async function saveEntry(event) {
+        function saveEntries(entries) {
+            localStorage.setItem('timesheet_entries', JSON.stringify(entries));
+        }
+
+        // ========== TAB SWITCHING ==========
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            document.getElementById('entry-view').style.display = 'none';
+            document.getElementById('view-view').style.display = 'none';
+            document.getElementById('report-view').style.display = 'none';
+            
+            document.getElementById(`${tab}-view`).style.display = 'block';
+            
+            if (tab === 'view') displayEntries();
+        }
+
+        // ========== SAVE ENTRY ==========
+        function saveEntry(event) {
             event.preventDefault();
             
             const staff = document.getElementById('staff-select').value;
@@ -542,6 +438,7 @@ function login() {
             const editId = document.getElementById('edit-id').value;
             
             const entry = {
+                id: editId || Date.now().toString(),
                 staff: staff,
                 date: date,
                 inbound_calls: parseInt(document.getElementById('inbound-calls').value) || 0,
@@ -562,135 +459,51 @@ function login() {
                 system_updated: document.getElementById('system-updated').checked,
                 servcraft_updated: document.getElementById('servcraft-updated').checked,
                 router_updated: document.getElementById('router-updated').checked,
-                notes: document.getElementById('notes').value || ''
+                notes: document.getElementById('notes').value
             };
             
-            try {
-                if (editId) {
-                    // Update existing entry
-                    const { error } = await supabase
-                        .from('timesheet_entries')
-                        .update(entry)
-                        .eq('id', editId);
-                    
-                    if (error) throw error;
-                } else {
-                    // Check if entry exists for this staff/date
-                    const { data: existing } = await supabase
-                        .from('timesheet_entries')
-                        .select('*')
-                        .eq('staff', staff)
-                        .eq('date', date);
-                    
-                    if (existing && existing.length > 0) {
-                        if (!confirm('Entry already exists for this date. Do you want to update it?')) {
-                            return;
-                        }
-                        // Update existing
-                        const { error } = await supabase
-                            .from('timesheet_entries')
-                            .update(entry)
-                            .eq('staff', staff)
-                            .eq('date', date);
-                        
-                        if (error) throw error;
-                    } else {
-                        // Insert new entry
-                        const { error } = await supabase
-                            .from('timesheet_entries')
-                            .insert([entry]);
-                        
-                        if (error) throw error;
+            let entries = getEntries();
+            
+            if (!editId) {
+                const exists = entries.some(e => e.staff === staff && e.date === date);
+                if (exists) {
+                    if (!confirm('Entry already exists for this date. Do you want to update it?')) {
+                        return;
                     }
+                    entries = entries.filter(e => !(e.staff === staff && e.date === date));
                 }
-                
-                alert('Entry saved to cloud successfully!');
-                clearForm();
-                showTab('view');
-                displayEntries();
-            } catch (error) {
-                console.error('Error saving to cloud:', error);
-                alert('Failed to save to cloud. Please try again.');
+            } else {
+                entries = entries.filter(e => e.id !== editId);
             }
-        }
-
-        // Delete entry from cloud
-        async function deleteEntry(id) {
-            if (!confirm('Are you sure you want to delete this entry?')) return;
             
-            try {
-                const { error } = await supabase
-                    .from('timesheet_entries')
-                    .delete()
-                    .eq('id', id);
-                
-                if (error) throw error;
-                
-                alert('Entry deleted from cloud');
-                displayEntries();
-            } catch (error) {
-                console.error('Error deleting:', error);
-                alert('Failed to delete from cloud');
-            }
-        }
-
-        // Display entries with filters
-        async function displayEntries() {
-            const container = document.getElementById('entries-container');
-            container.innerHTML = '<div class="loading">Loading from cloud...</div>';
+            entries.push(entry);
+            saveEntries(entries);
             
-            try {
-                let entries = await getEntries();
-                const staffFilter = document.getElementById('filter-staff').value;
-                const dateFilter = document.getElementById('filter-date').value;
-                
-                if (staffFilter) {
-                    entries = entries.filter(e => e.staff === staffFilter);
+            alert('Entry saved successfully!');
+            clearForm();
+            showTab('view');
+            displayEntries();
+        }
+
+        // ========== CHECK TODAY'S ENTRY ==========
+        function checkTodayEntry() {
+            const staff = document.getElementById('staff-select').value;
+            if (!staff) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('entry-date').value = today;
+            
+            const entries = getEntries();
+            const existing = entries.find(e => e.staff === staff && e.date === today);
+            
+            if (existing) {
+                if (confirm('Entry exists for today. Load it for editing?')) {
+                    loadEntryForEdit(existing);
                 }
-                if (dateFilter) {
-                    entries = entries.filter(e => e.date === dateFilter);
-                }
-                
-                if (entries.length === 0) {
-                    container.innerHTML = '<p>No entries found in cloud.</p>';
-                    return;
-                }
-                
-                let html = '';
-                entries.forEach(entry => {
-                    html += `
-                        <div class="entry-item">
-                            <div class="entry-header">
-                                <div>
-                                    <span class="entry-date">${entry.date}</span> - 
-                                    <span class="user-badge" style="background: #28a745;">${entry.staff}</span>
-                                </div>
-                                <div class="entry-actions">
-                                    <button onclick='loadEntryForEdit(${JSON.stringify(entry).replace(/'/g, "\\'")})'>✏️ Edit</button>
-                                    <button class="danger" onclick="deleteEntry('${entry.id}')">🗑️ Delete</button>
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px;">
-                                <div>📞 Calls: ${entry.inbound_calls}</div>
-                                <div>💬 WhatsApp: ${entry.whatsapp_chats}</div>
-                                <div>📧 Emails: ${entry.emails}</div>
-                                <div>🎫 Tickets: ${entry.gen_logged}</div>
-                                <div>🔧 Install: ${entry.installations}</div>
-                                <div>📊 Leads: ${entry.leads_received}</div>
-                            </div>
-                            ${entry.notes ? `<div style="margin-top: 10px; color: #666;">📝 ${entry.notes}</div>` : ''}
-                        </div>
-                    `;
-                });
-                
-                container.innerHTML = html;
-            } catch (error) {
-                console.error('Error displaying entries:', error);
-                container.innerHTML = '<p class="error-msg">Error loading from cloud. Please refresh.</p>';
             }
         }
 
-        // Load entry for editing
+        // ========== LOAD ENTRY FOR EDIT ==========
         function loadEntryForEdit(entry) {
             document.getElementById('edit-id').value = entry.id;
             document.getElementById('staff-select').value = entry.staff;
@@ -718,33 +531,70 @@ function login() {
             showTab('entry');
         }
 
-        // Check for today's entry
-        async function checkTodayEntry() {
-            const staff = document.getElementById('staff-select').value;
-            if (!staff) return;
+        // ========== DISPLAY ENTRIES ==========
+        function displayEntries() {
+            let entries = getEntries();
+            const staffFilter = document.getElementById('filter-staff').value;
+            const dateFilter = document.getElementById('filter-date').value;
             
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('entry-date').value = today;
+            if (staffFilter) {
+                entries = entries.filter(e => e.staff === staffFilter);
+            }
+            if (dateFilter) {
+                entries = entries.filter(e => e.date === dateFilter);
+            }
             
-            try {
-                const { data: existing } = await supabase
-                    .from('timesheet_entries')
-                    .select('*')
-                    .eq('staff', staff)
-                    .eq('date', today);
-                
-                if (existing && existing.length > 0) {
-                    if (confirm('Entry exists for today. Load it for editing?')) {
-                        loadEntryForEdit(existing[0]);
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking entry:', error);
+            entries.sort((a, b) => b.date.localeCompare(a.date));
+            
+            const container = document.getElementById('entries-container');
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<p>No entries found.</p>';
+                return;
+            }
+            
+            let html = '';
+            entries.forEach(entry => {
+                html += `
+                    <div class="entry-item">
+                        <div class="entry-header">
+                            <div>
+                                <span class="entry-date">${entry.date}</span> - 
+                                <span style="background:#28a745; color:white; padding:3px 8px; border-radius:10px;">${entry.staff}</span>
+                            </div>
+                            <div class="entry-actions">
+                                <button onclick='loadEntryForEdit(${JSON.stringify(entry).replace(/'/g, "\\'")})'>✏️ Edit</button>
+                                <button class="danger" onclick="deleteEntry('${entry.id}')">🗑️ Delete</button>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px;">
+                            <div>📞 Calls: ${entry.inbound_calls}</div>
+                            <div>💬 WhatsApp: ${entry.whatsapp_chats}</div>
+                            <div>📧 Emails: ${entry.emails}</div>
+                            <div>🎫 Tickets: ${entry.gen_logged}</div>
+                            <div>🔧 Install: ${entry.installations}</div>
+                            <div>📊 Leads: ${entry.leads_received}</div>
+                        </div>
+                        ${entry.notes ? `<div style="margin-top: 10px; color: #666;">📝 ${entry.notes}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // ========== DELETE ENTRY ==========
+        function deleteEntry(id) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                let entries = getEntries();
+                entries = entries.filter(e => e.id !== id);
+                saveEntries(entries);
+                displayEntries();
             }
         }
 
-        // Generate monthly report
-        async function generateReport() {
+        // ========== GENERATE REPORT ==========
+        function generateReport() {
             const staff = document.getElementById('report-staff').value;
             const month = document.getElementById('report-month').value;
             
@@ -753,118 +603,110 @@ function login() {
                 return;
             }
             
-            document.getElementById('report-container').innerHTML = '<div class="loading">Generating report...</div>';
+            const entries = getEntries();
+            const [year, mon] = month.split('-');
             
-            try {
-                const entries = await getEntries();
-                const [year, mon] = month.split('-');
-                
-                const monthEntries = entries.filter(e => 
-                    e.staff === staff && 
-                    e.date.startsWith(`${year}-${mon}`)
-                );
-                
-                if (monthEntries.length === 0) {
-                    document.getElementById('report-container').innerHTML = '<p>No entries for this period.</p>';
-                    return;
-                }
-                
-                // Calculate totals (same as before)
-                const totals = {
-                    inbound_calls: 0, whatsapp_chats: 0, emails: 0,
-                    gen_logged: 0, gen_resolved: 0, net_logged: 0,
-                    net_resolved: 0, fibre_logged: 0, fibre_resolved: 0,
-                    installations: 0, fibre_bookings: 0, toc_sent: 0,
-                    leads_received: 0, leads_contacted: 0, leads_converted: 0
-                };
-                
-                monthEntries.forEach(entry => {
-                    Object.keys(totals).forEach(key => {
-                        totals[key] += entry[key] || 0;
-                    });
+            const monthEntries = entries.filter(e => 
+                e.staff === staff && 
+                e.date.startsWith(`${year}-${mon}`)
+            );
+            
+            if (monthEntries.length === 0) {
+                document.getElementById('report-container').innerHTML = '<p>No entries for this period.</p>';
+                return;
+            }
+            
+            // Calculate totals
+            const totals = {
+                inbound_calls: 0, whatsapp_chats: 0, emails: 0,
+                gen_logged: 0, gen_resolved: 0, net_logged: 0,
+                net_resolved: 0, fibre_logged: 0, fibre_resolved: 0,
+                installations: 0, fibre_bookings: 0, toc_sent: 0,
+                leads_received: 0, leads_contacted: 0, leads_converted: 0
+            };
+            
+            monthEntries.forEach(entry => {
+                Object.keys(totals).forEach(key => {
+                    totals[key] += entry[key] || 0;
                 });
-                
-                monthEntries.sort((a, b) => a.date.localeCompare(b.date));
-                
-                // Build report HTML (same as before)
-                let reportHTML = `
-                    <div id="report-print-area">
-                        <div style="text-align: center; margin-bottom: 20px;">
-                            <h2>Monthly Timesheet Report</h2>
-                            <h3>${staff} - ${month}</h3>
-                        </div>
-                        
-                        <div class="summary">
-                            <h3>📊 Summary Totals</h3>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-                                <div>
-                                    <h4>Communications</h4>
-                                    <p>Inbound Calls: ${totals.inbound_calls}</p>
-                                    <p>WhatsApp Chats: ${totals.whatsapp_chats}</p>
-                                    <p>Emails: ${totals.emails}</p>
-                                </div>
-                                <div>
-                                    <h4>Tickets</h4>
-                                    <p>General Logged: ${totals.gen_logged}</p>
-                                    <p>General Resolved: ${totals.gen_resolved}</p>
-                                    <p>Network Down: ${totals.net_logged}</p>
-                                    <p>Fibre Break: ${totals.fibre_logged}</p>
-                                </div>
-                                <div>
-                                    <h4>Installations & Leads</h4>
-                                    <p>Installations: ${totals.installations}</p>
-                                    <p>Fibre Bookings: ${totals.fibre_bookings}</p>
-                                    <p>Leads Received: ${totals.leads_received}</p>
-                                    <p>Leads Converted: ${totals.leads_converted}</p>
-                                </div>
+            });
+            
+            monthEntries.sort((a, b) => a.date.localeCompare(b.date));
+            
+            let reportHTML = `
+                <div>
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2>Monthly Timesheet Report</h2>
+                        <h3>${staff} - ${month}</h3>
+                    </div>
+                    
+                    <div class="summary">
+                        <h3>📊 Summary Totals</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                            <div>
+                                <h4>Communications</h4>
+                                <p>Inbound Calls: ${totals.inbound_calls}</p>
+                                <p>WhatsApp Chats: ${totals.whatsapp_chats}</p>
+                                <p>Emails: ${totals.emails}</p>
+                            </div>
+                            <div>
+                                <h4>Tickets</h4>
+                                <p>General Logged: ${totals.gen_logged}</p>
+                                <p>General Resolved: ${totals.gen_resolved}</p>
+                                <p>Network Down: ${totals.net_logged}</p>
+                                <p>Fibre Break: ${totals.fibre_logged}</p>
+                            </div>
+                            <div>
+                                <h4>Installations & Leads</h4>
+                                <p>Installations: ${totals.installations}</p>
+                                <p>Fibre Bookings: ${totals.fibre_bookings}</p>
+                                <p>Leads Received: ${totals.leads_received}</p>
+                                <p>Leads Converted: ${totals.leads_converted}</p>
                             </div>
                         </div>
-                        
-                        <h3>📅 Daily Breakdown</h3>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                            <thead>
-                                <tr style="background: #007bff; color: white;">
-                                    <th style="padding: 8px; border: 1px solid #ddd;">Date</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd;">Calls</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd;">WhatsApp</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd;">Emails</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd;">Tickets</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd;">Install</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd;">Leads</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                
-                monthEntries.forEach(entry => {
-                    reportHTML += `
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${entry.date}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.inbound_calls}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.whatsapp_chats}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.emails}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.gen_logged}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.installations}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.leads_received}</td>
-                        </tr>
-                    `;
-                });
-                
-                reportHTML += `
-                            </tbody>
-                        </table>
-                        <p style="margin-top: 20px;"><strong>Total Days Worked:</strong> ${monthEntries.length}</p>
                     </div>
+                    
+                    <h3>📅 Daily Breakdown</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr style="background: #007bff; color: white;">
+                                <th style="padding: 8px; border: 1px solid #ddd;">Date</th>
+                                <th style="padding: 8px; border: 1px solid #ddd;">Calls</th>
+                                <th style="padding: 8px; border: 1px solid #ddd;">WhatsApp</th>
+                                <th style="padding: 8px; border: 1px solid #ddd;">Emails</th>
+                                <th style="padding: 8px; border: 1px solid #ddd;">Tickets</th>
+                                <th style="padding: 8px; border: 1px solid #ddd;">Install</th>
+                                <th style="padding: 8px; border: 1px solid #ddd;">Leads</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            monthEntries.forEach(entry => {
+                reportHTML += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${entry.date}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.inbound_calls}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.whatsapp_chats}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.emails}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.gen_logged}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.installations}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${entry.leads_received}</td>
+                    </tr>
                 `;
-                
-                document.getElementById('report-container').innerHTML = reportHTML;
-            } catch (error) {
-                console.error('Error generating report:', error);
-                document.getElementById('report-container').innerHTML = '<p class="error-msg">Error generating report</p>';
-            }
+            });
+            
+            reportHTML += `
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 20px;"><strong>Total Days Worked:</strong> ${monthEntries.length}</p>
+                </div>
+            `;
+            
+            document.getElementById('report-container').innerHTML = reportHTML;
         }
 
-        // Print report
+        // ========== PRINT REPORT ==========
         function printReport() {
             const reportContent = document.getElementById('report-container').innerHTML;
             if (!reportContent || reportContent.includes('No entries')) {
@@ -880,12 +722,9 @@ function login() {
                         <style>
                             body { font-family: Arial, sans-serif; padding: 20px; }
                             table { border-collapse: collapse; width: 100%; }
-                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th, td { border: 1px solid #ddd; padding: 8px; }
                             th { background: #007bff; color: white; }
-                            .summary { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0; }
-                            @media print {
-                                button { display: none; }
-                            }
+                            .summary { background: #f0f0f0; padding: 15px; border-radius: 5px; }
                         </style>
                     </head>
                     <body>
@@ -897,40 +736,7 @@ function login() {
             printWindow.print();
         }
 
-        // Refresh data
-        function refreshData() {
-            const activeTab = document.querySelector('.tab.active').id.replace('tab-', '');
-            if (activeTab === 'view') {
-                displayEntries();
-            } else if (activeTab === 'report') {
-                // Just refresh the report if parameters are set
-                const staff = document.getElementById('report-staff').value;
-                const month = document.getElementById('report-month').value;
-                if (staff && month) {
-                    generateReport();
-                } else {
-                    alert('Select staff and month then click Generate Report');
-                }
-            }
-        }
-
-        // ========== TAB SWITCHING ==========
-        function showTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            
-            document.getElementById('entry-view').style.display = 'none';
-            document.getElementById('view-view').style.display = 'none';
-            document.getElementById('report-view').style.display = 'none';
-            
-            document.getElementById(`${tab}-view`).style.display = 'block';
-            
-            if (tab === 'view') {
-                displayEntries();
-            }
-        }
-
-        // Clear form
+        // ========== CLEAR FORM ==========
         function clearForm() {
             document.getElementById('edit-id').value = '';
             document.getElementById('entry-form').reset();
@@ -942,19 +748,11 @@ function login() {
             document.getElementById('notes').value = '';
         }
 
-        // Clear filter
+        // ========== CLEAR FILTER ==========
         function clearFilter() {
             document.getElementById('filter-staff').value = '';
             document.getElementById('filter-date').value = '';
             displayEntries();
-        }
-
-        // Show error
-        function showError(message) {
-            const container = document.getElementById('entries-container');
-            if (container) {
-                container.innerHTML = `<p class="error-msg">${message}</p>`;
-            }
         }
 
         // Initialize
@@ -962,4 +760,3 @@ function login() {
     </script>
 </body>
 </html>
-
