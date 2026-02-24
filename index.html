@@ -460,18 +460,22 @@
         const managerPassword = 'Lebo2026';
         const currentUserKey = 'manager_logged_in';
 
-        // Login
-        function login() {
-            const username = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value;
+   // Login
+function login() {
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
 
-            if (username === managerUser && password === managerPassword) {
-                localStorage.setItem(currentUserKey, 'true');
-                showMainApp();
-            } else {
-                document.getElementById('login-message').innerHTML = 'Invalid username or password';
-            }
-        }
+    // Debug - remove after testing
+    console.log('Attempting login with:', username, password);
+    console.log('Expected:', 'Lebo', 'Lebo2026');
+
+    if (username === 'Lebo' && password === 'Lebo2026') {
+        localStorage.setItem('manager_logged_in', 'true');
+        showMainApp();
+    } else {
+        document.getElementById('login-message').innerHTML = 'Invalid username or password';
+    }
+}
 
         // Logout
         function logout() {
@@ -958,3 +962,4 @@
     </script>
 </body>
 </html>
+
